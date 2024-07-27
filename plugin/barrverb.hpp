@@ -1,0 +1,62 @@
+/*
+   BarrVerb reverb plugin
+
+   Copyright 2024 Gordon JC Pearce <gordonjcp@gjcp.net>
+
+   Permission to use, copy, modify, and/or distribute this software for any
+   purpose with or without fee is hereby granted, provided that the above
+   copyright notice and this permission notice appear in all copies.
+
+   THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+   WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+   MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
+   SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+   WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION
+   OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
+   CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+*/
+
+#ifndef BARRVERB_HPP
+#define BARRVERB_HPP
+
+#include "DistrhoPlugin.hpp"
+
+START_NAMESPACE_DISTRHO
+
+class BarrVerb : public Plugin {
+   public:
+    enum Parameters {
+        program,
+        kParameterCount
+    };
+
+    BarrVerb();
+
+   protected:
+    const char *getLabel() const override { return "BarrVerb"; }
+    const char *getDescription() const override {
+        return "MIDIVerb emulation, a tribute to Keith Barr";
+    }
+    const char *getMaker() const override { return "Gordonjcp"; }
+    const char *getLicense() const override { return "ISC"; }
+    uint32_t getVersion() const override { return d_version(1, 0, 0); }
+    int64_t getUniqueId() const override { return d_cconst('B', 'A', 'R', 'R'); }
+
+    // Initialisation
+    void initAudioPort(bool input, uint32_t index, AudioPort &port) override;
+    void initProgramName(uint32_t index, String &programName) override;
+
+    // Processing
+    void activate() override;
+    void deactivate() override;
+    void run(const float **inputs, float **outputs, uint32_t frames) override;
+
+   private:
+    float c1, c2, d0, in_z1, in_z2, out_z1, out_z2;
+
+    DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(BarrVerb);
+};
+
+END_NAMESPACE_DISTRHO
+
+#endif  // BARRVERB_HPP
