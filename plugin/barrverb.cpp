@@ -52,7 +52,7 @@ BarrVerb::BarrVerb() : Plugin(kParameterCount, 1, 0) {  // two parameters, one p
     float fc = 10000;
     float F = fc / 48000;  // assume 48kHz
     float w = 2 * tan(3.14159 * F);
-    float a = w / 0.5412;  // 1dB Chebyshev, 2-pole
+    float a = w / 0.5412;  // Butterworth 4-pole first stage
     float b = w * w;
 
     // "corrected" SVF params, per Fons Adriaensen
@@ -63,7 +63,7 @@ BarrVerb::BarrVerb() : Plugin(kParameterCount, 1, 0) {  // two parameters, one p
     fc = 10000;
     F = fc / 48000;  // assume 48kHz
     w = 2 * tan(3.14159 * F);
-    a = w / 1.3065;  // 1dB Chebyshev, 2-pole
+    a = w / 1.3065;  // Butterworth 4-pole second stage
     b = w * w;
 
     c1_2 = (a + b) / (1 + a / 2 + b / 4);
