@@ -1,0 +1,8 @@
+[core]
+	repositoryformatversion = 0
+	filemode = true
+	bare = false
+	logallrefupdates = true
+[submodule "dpf"]
+	url = https://github.com/DISTRHO/DPF
+	active = true
