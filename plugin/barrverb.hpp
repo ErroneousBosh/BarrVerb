@@ -54,6 +54,10 @@ class BarrVerb : public Plugin {
    private:
     float c1_1, c2_1, d0_1, c1_2, c2_2, d0_2, in_z1, in_z2, in_z12,in_z22, out_z1, out_z2;
 
+    int16_t ai, li, acc;
+    uint16_t ptr;
+
+    int16_t *ram;
     float *lowpass;
 
 
