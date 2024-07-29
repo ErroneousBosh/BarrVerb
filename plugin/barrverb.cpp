@@ -17,36 +17,38 @@
 */
 
 #include "barrverb.hpp"
+#include "rom.h"
 
 START_NAMESPACE_DISTRHO
 
 BarrVerb::BarrVerb() : Plugin(kParameterCount, 1, 0) {  // two parameters, one program, no states
     lowpass = new float[getBufferSize()];
+    ram = new int16_t[16384];
 
-/*
-    // calculate SVF params
-    // hardcoded values for now
-    float fc = 5019;
-    float F = fc / 48000;  // assume 48kHz
-    float w = 2 * tan(3.14159 * F);
-    float a = w / 0.7845;  // 1dB Chebyshev, 2-pole
-    float b = w * w;
-
-    // "corrected" SVF params, per Fons Adriaensen
-    c1_1 = (a + b) / (1 + a / 2 + b / 4);
-    c2_1 = b / (a + b);
-    d0_1 = c1_1 * c2_1 / 4;
-
-    fc = 9433;
-    F = fc / 48000;  // assume 48kHz
-    w = 2 * tan(3.14159 * F);
-    a = w / 3.5594;  // 1dB Chebyshev, 2-pole
-    b = w * w;
-
-    c1_2 = (a + b) / (1 + a / 2 + b / 4);
-    c2_2 = b / (a + b);
-    d0_2 = c1_2 * c2_2 / 4;*/
+    /*
         // calculate SVF params
+        // hardcoded values for now
+        float fc = 5019;
+        float F = fc / 48000;  // assume 48kHz
+        float w = 2 * tan(3.14159 * F);
+        float a = w / 0.7845;  // 1dB Chebyshev, 2-pole
+        float b = w * w;
+
+        // "corrected" SVF params, per Fons Adriaensen
+        c1_1 = (a + b) / (1 + a / 2 + b / 4);
+        c2_1 = b / (a + b);
+        d0_1 = c1_1 * c2_1 / 4;
+
+        fc = 9433;
+        F = fc / 48000;  // assume 48kHz
+        w = 2 * tan(3.14159 * F);
+        a = w / 3.5594;  // 1dB Chebyshev, 2-pole
+        b = w * w;
+
+        c1_2 = (a + b) / (1 + a / 2 + b / 4);
+        c2_2 = b / (a + b);
+        d0_2 = c1_2 * c2_2 / 4;*/
+    // calculate SVF params
     // hardcoded values for now
 
     float fc = 10000;
@@ -97,7 +99,8 @@ void BarrVerb::deactivate() {
 void BarrVerb::run(const float **inputs, float **outputs, uint32_t frames) {
     // actual effects here
 
-    float x, o;
+    float x;
+    uint16_t opcode;
 
     for (uint32_t i = 0; i < frames; i++) {
         // smash to mono
@@ -113,8 +116,49 @@ void BarrVerb::run(const float **inputs, float **outputs, uint32_t frames) {
         in_z12 += c1_2 * x;
         lowpass[i] = d0_2 * x + in_z22;
 
-        outputs[0][i] = lowpass[i];
-        outputs[1][i] = lowpass[i];
+        // run the actual DSP engine for each sample
+        for (uint8_t step = 0; step < 128; step++) {
+            opcode = rom[(128*48) + step];
+            switch (opcode & 0xc000) {
+                case 0x0000:
+                    ai = ram[ptr];
+                    li = acc + (ai >> 1);
+                    break;
+                case 0x4000:
+                    ai = ram[ptr];
+                    li = (ai >> 1);
+                    break;
+                case 0x8000:
+                    ai = acc;
+                    ram[ptr] = ai;
+                    li = acc + (ai >> 1);
+                    break;
+                case 0xc000:
+                    ai = acc;
+                    ram[ptr] = -ai;
+                    li = -(ai >> 1);
+                    break;
+            }
+            if (step == 0x00) {
+                // load RAM from ADC
+                ram[ptr] = (int)(lowpass[i] * 4096);
+            } else if (step == 0x60) {
+                // output right channel
+                outputs[1][i] = (float)ai / 4096;
+            } else if (step == 0x70) {
+                // output left channel
+                outputs[0][i] = (float)ai / 4096;
+            } else {
+                // everything else
+                // ADC and DAC operations don't affect the accumulator
+                // every other step ends with the accumulator latched from the Latch Input reg
+                acc = li;
+            }
+
+            // 16kW of RAM
+            ptr += opcode & 0x3fff;
+            ptr &= 0x3fff;
+        }
     }
 }
 
