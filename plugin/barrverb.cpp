@@ -115,10 +115,13 @@ void BarrVerb::run(const float **inputs, float **outputs, uint32_t frames) {
         in_z22 += c2_2 * in_z12;
         in_z12 += c1_2 * x;
         lowpass[i] = d0_2 * x + in_z22;
+    }
 
+    // now run the DSP
+    for (uint32_t i=0; i < frames; i+=2) {
         // run the actual DSP engine for each sample
         for (uint8_t step = 0; step < 128; step++) {
-            opcode = rom[(128*48) + step];
+            opcode = rom[(128*44) + step];
             switch (opcode & 0xc000) {
                 case 0x0000:
                     ai = ram[ptr];
@@ -145,9 +148,12 @@ void BarrVerb::run(const float **inputs, float **outputs, uint32_t frames) {
             } else if (step == 0x60) {
                 // output right channel
                 outputs[1][i] = (float)ai / 4096;
+                outputs[1][i+1] = (float)ai / 4096;
+
             } else if (step == 0x70) {
                 // output left channel
                 outputs[0][i] = (float)ai / 4096;
+                outputs[0][i+1] = (float)ai / 4096;
             } else {
                 // everything else
                 // ADC and DAC operations don't affect the accumulator
@@ -164,4 +170,5 @@ void BarrVerb::run(const float **inputs, float **outputs, uint32_t frames) {
 
 // create the plugin
 Plugin *createPlugin() { return new BarrVerb(); }
+
 END_NAMESPACE_DISTRHO
