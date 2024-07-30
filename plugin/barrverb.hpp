@@ -45,17 +45,20 @@ class BarrVerb : public Plugin {
     // Initialisation
     void initAudioPort(bool input, uint32_t index, AudioPort &port) override;
     void initProgramName(uint32_t index, String &programName) override;
-    
+    void loadProgram(uint32_t index) override;
+
     // Processing
     void activate() override;
     void deactivate() override;
     void run(const float **inputs, float **outputs, uint32_t frames) override;
 
    private:
+
     float c1_1, c2_1, d0_1, c1_2, c2_2, d0_2, in_z1, in_z2, in_z12,in_z22, out_z1, out_z2;
 
     int16_t ai, li, acc;
     uint16_t ptr;
+    uint16_t prog_offset;
 
     int16_t *ram;
     float *lowpass;

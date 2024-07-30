@@ -83,6 +83,12 @@ void BarrVerb::initAudioPort(bool input, uint32_t index, AudioPort &port) {
 void BarrVerb::initProgramName(uint32_t index, String &programName) {
 
     programName = "init program"; //&prog_name[index & 0x3f];
+    programName = prog_name[index & 0x3f].c_str();
+
+}
+
+void BarrVerb::loadProgram(uint32_t index) {
+    prog_offset = (index & 0x3f) << 7;
 }
 
 // Processing functions
@@ -122,7 +128,7 @@ void BarrVerb::run(const float **inputs, float **outputs, uint32_t frames) {
     for (uint32_t i=0; i < frames; i+=2) {
         // run the actual DSP engine for each sample
         for (uint8_t step = 0; step < 128; step++) {
-            opcode = rom[(128*57) + step];
+            opcode = rom[prog_offset + step];
             switch (opcode & 0xc000) {
                 case 0x0000:
                     ai = ram[ptr];
