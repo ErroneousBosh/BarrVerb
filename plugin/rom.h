@@ -1,3 +1,32 @@
+#include <stdint.h>
+#include <string>
+
+#include "DistrhoPlugin.hpp"
+
+
+const std::string prog_name[] = {
+    ".2 Sec Small Bright", ".2 Sec Small Warm", ".2 Sec Medium Bright",
+    ".3 Sec Small Bright", ".3 Sec Small Warm", ".4 Sec Medium Bright",
+    ".4 Sec Medium Warm", ".6 Sec Small Bright", ".6 Sec Medium Warm",
+    ".6 Sec Medium Dark", ".8 Sec Small Bright", ".8 Sec Large Warm",
+    "1.0 Sec Small Warm", "1.0 Sec Medium Warm", "1.0 Sec Large Bright",
+    "1.2 Medium Warm", "1.2 Sec Small Warm", "1.2 Sec Small Bright",
+    "1.4 Sec Large Warm", "1.4 Sec Large Dark", "1.4 Sec Medium Warm",
+    "1.6 Sec Small Dark", "1.6 Sec Large Bright", "1.6 Sec Medium Bright",
+    "1.8 Sec Large Dark", "1.8 Sec Large Bright", "1.8 Sec Medium Warm",
+    "2.0 Sec Large Bright", "2.0 Sec Medium Warm", "2.0 Sec Large Warm",
+    "2.5 Sec Medium Warm", "2.5 Sec Large Bright", "2.5 Sec Medium Bright",
+    "2.8 Sec Small Bright", "2.8 Sec Medium Bright", "3.0 Sec Large Bright",
+    "3.0 Sec Large Warm", "3.0 Sec Medium Dark", "3.5 Sec Large Bright", 
+    "3.5 Sec Medium Warm", "4.0 Sec Large Dark", "4.0 Sec Medium Bright",
+    "5 Sec Large Warm", "8 Sec Large Bright", "8 Sec Large Warm",
+    "10 Sec Large Bright", "10 Sec Large Warm", "16 Sec Large Dark",
+    "18 Sec Ex. Large Bright", "20 Sec Ex Large Dark", "Gated - 100ms",
+    "Gated - 150ms", "Gated - 200ms", "Gated - 250ms", "Gated - 300ms", 
+    "Gated - 350ms", "Gated - 400ms", "Gated - 500ms", "Gated - 600ms",
+    "Reverse - 300ms", "Reverse - 400ms", "Reverse - 500ms", "Reverse - 600ms"
+};
+
 const uint16_t rom[] = {
     // Program  0, 0x0000
     0x3e38, 0x7cff, 0x3e44, 0x3f3a, 0x074c, 0x8000, 0x4004, 0xbd44, 

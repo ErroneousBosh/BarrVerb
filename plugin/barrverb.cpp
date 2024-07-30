@@ -21,7 +21,7 @@
 
 START_NAMESPACE_DISTRHO
 
-BarrVerb::BarrVerb() : Plugin(kParameterCount, 1, 0) {  // two parameters, one program, no states
+BarrVerb::BarrVerb() : Plugin(kParameterCount, 64, 0) {  // two parameters, one program, no states
     lowpass = new float[getBufferSize()];
     ram = new int16_t[16384];
 
@@ -81,7 +81,8 @@ void BarrVerb::initAudioPort(bool input, uint32_t index, AudioPort &port) {
 }
 
 void BarrVerb::initProgramName(uint32_t index, String &programName) {
-    programName = "Default Reverb";
+
+    programName = "init program"; //&prog_name[index & 0x3f];
 }
 
 // Processing functions
@@ -121,7 +122,7 @@ void BarrVerb::run(const float **inputs, float **outputs, uint32_t frames) {
     for (uint32_t i=0; i < frames; i+=2) {
         // run the actual DSP engine for each sample
         for (uint8_t step = 0; step < 128; step++) {
-            opcode = rom[(128*44) + step];
+            opcode = rom[(128*57) + step];
             switch (opcode & 0xc000) {
                 case 0x0000:
                     ai = ram[ptr];
