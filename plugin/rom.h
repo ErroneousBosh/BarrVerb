@@ -24,7 +24,9 @@ const std::string prog_name[] = {
     "18 Sec Ex. Large Bright", "20 Sec Ex Large Dark", "Gated - 100ms",
     "Gated - 150ms", "Gated - 200ms", "Gated - 250ms", "Gated - 300ms", 
     "Gated - 350ms", "Gated - 400ms", "Gated - 500ms", "Gated - 600ms",
-    "Reverse - 300ms", "Reverse - 400ms", "Reverse - 500ms", "Reverse - 600ms"
+    "Reverse - 300ms", "Reverse - 400ms", "Reverse - 500ms",
+    "Reverse - 600ms", "Defeat"
+
 };
 
 const uint16_t rom[] = {
