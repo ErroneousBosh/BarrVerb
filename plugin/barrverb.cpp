@@ -25,6 +25,8 @@ BarrVerb::BarrVerb() : Plugin(kParameterCount, 64, 0) {  // two parameters, one 
     lowpass = new float[getBufferSize()];
     ram = new int16_t[16384];
 
+    loadProgram(20);
+
     /*
         // calculate SVF params
         // hardcoded values for now
@@ -82,12 +84,11 @@ void BarrVerb::initAudioPort(bool input, uint32_t index, AudioPort &port) {
 
 void BarrVerb::initProgramName(uint32_t index, String &programName) {
 
-    programName = "init program"; //&prog_name[index & 0x3f];
     programName = prog_name[index & 0x3f].c_str();
-
 }
 
 void BarrVerb::loadProgram(uint32_t index) {
+    printf("called loadProgram(%d)\n", index);
     prog_offset = (index & 0x3f) << 7;
 }
 
@@ -149,18 +150,26 @@ void BarrVerb::run(const float **inputs, float **outputs, uint32_t frames) {
                     li = -(ai >> 1);
                     break;
             }
+
+            // clamp
+            if (ai > 2047) ai=2047;
+            if (ai < -2047) ai=-2047;
+
+
             if (step == 0x00) {
                 // load RAM from ADC
-                ram[ptr] = (int)(lowpass[i] * 4096);
+                ram[ptr] = (int)(lowpass[i] * 2048);
             } else if (step == 0x60) {
                 // output right channel
-                outputs[1][i] = (float)ai / 4096;
-                outputs[1][i+1] = (float)ai / 4096;
+               //ai=0;
+                outputs[1][i] = (float)ai / 2048;
+                outputs[1][i+1] = (float)ai / 2048;
 
             } else if (step == 0x70) {
                 // output left channel
-                outputs[0][i] = (float)ai / 4096;
-                outputs[0][i+1] = (float)ai / 4096;
+                //ai=0;
+                outputs[0][i] = (float)ai / 2048;
+                outputs[0][i+1] = (float)ai / 2048;
             } else {
                 // everything else
                 // ADC and DAC operations don't affect the accumulator
