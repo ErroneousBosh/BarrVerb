@@ -21,7 +21,7 @@
 
 START_NAMESPACE_DISTRHO
 
-BarrVerb::BarrVerb() : Plugin(kParameterCount, 64, 0) {  // two parameters, one program, no states
+BarrVerb::BarrVerb() : Plugin(kParameterCount, 64, 0) {  // one parameter, 64 programs, no states
     lowpass = new float[getBufferSize()];
     ram = new int16_t[16384];
 
@@ -77,6 +77,31 @@ BarrVerb::BarrVerb() : Plugin(kParameterCount, 64, 0) {  // two parameters, one 
 
 // Initialisation functions
 
+void BarrVerb::initParameter(uint32_t index, Parameter &parameter) {
+    if (index == paramProgram) {
+        parameter.hints = kParameterIsAutomatable | kParameterIsInteger;
+        parameter.name = "Program";
+        parameter.symbol = "program";
+        parameter.ranges.def = 20.0f;
+        parameter.ranges.min = 1.0f;
+        parameter.ranges.max = 64.0f; 
+    }
+}
+
+void BarrVerb::setParameterValue(uint32_t index, float value) {
+    if (index == paramProgram) {
+        program = value;
+        prog_offset = (((int)value-1) & 0x3f) << 7;
+    }
+}
+
+float BarrVerb::getParameterValue(uint32_t index) const {
+    if (index == paramProgram) {
+        return program;
+    }
+    return 0;
+}
+
 void BarrVerb::initAudioPort(bool input, uint32_t index, AudioPort &port) {
     port.groupId = kPortGroupStereo;
     Plugin::initAudioPort(input, index, port);
@@ -88,8 +113,8 @@ void BarrVerb::initProgramName(uint32_t index, String &programName) {
 }
 
 void BarrVerb::loadProgram(uint32_t index) {
-    printf("called loadProgram(%d)\n", index);
     prog_offset = (index & 0x3f) << 7;
+    program = index + 1;
 }
 
 // Processing functions

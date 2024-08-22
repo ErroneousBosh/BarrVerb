@@ -26,7 +26,7 @@ START_NAMESPACE_DISTRHO
 class BarrVerb : public Plugin {
    public:
     enum Parameters {
-        program,
+        paramProgram,
         kParameterCount
     };
 
@@ -44,8 +44,15 @@ class BarrVerb : public Plugin {
 
     // Initialisation
     void initAudioPort(bool input, uint32_t index, AudioPort &port) override;
+    void initParameter(uint32_t index, Parameter &parameter) override;
+
+    void setParameterValue(uint32_t index, float value) override;
+    float getParameterValue(uint32_t index) const override;
+
+
     void initProgramName(uint32_t index, String &programName) override;
     void loadProgram(uint32_t index) override;
+
 
     // Processing
     void activate() override;
@@ -63,6 +70,7 @@ class BarrVerb : public Plugin {
     int16_t *ram;
     float *lowpass;
 
+    uint8_t program;
 
     DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(BarrVerb);
 };

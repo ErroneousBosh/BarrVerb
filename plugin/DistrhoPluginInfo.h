@@ -32,8 +32,7 @@
 
 
 enum Parameters {
-	program,
-	mix,
+	paramProg,
 	kParameterCount
 };
 
