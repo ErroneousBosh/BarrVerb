@@ -25,9 +25,10 @@ BarrVerb::BarrVerb() : Plugin(kParameterCount, 64, 0) {  // one parameter, 64 pr
     lowpass = new float[getBufferSize()];
     ram = new int16_t[16384];
 
-    loadProgram(20);
+    bzero(lowpass, sizeof(float) * getBufferSize());
+    bzero(ram, sizeof(int16_t) * 16384);
 
-    /*
+   /*
         // calculate SVF params
         // hardcoded values for now
         float fc = 5019;
