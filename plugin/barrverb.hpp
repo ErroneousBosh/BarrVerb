@@ -21,6 +21,18 @@
 
 #include "DistrhoPlugin.hpp"
 
+class SVF {
+   public:
+    SVF(float cutoff, float q, float samplerate);
+    void setFreq(float cutoff, float q, float samplerate);
+    float lpStep(float in);
+
+   private:
+    float w, a, b;
+    float c1, c2, d0;
+    float z1, z2, x;
+};
+
 START_NAMESPACE_DISTRHO
 
 class BarrVerb : public Plugin {
@@ -49,10 +61,8 @@ class BarrVerb : public Plugin {
     void setParameterValue(uint32_t index, float value) override;
     float getParameterValue(uint32_t index) const override;
 
-
     void initProgramName(uint32_t index, String &programName) override;
     void loadProgram(uint32_t index) override;
-
 
     // Processing
     void activate() override;
@@ -60,8 +70,8 @@ class BarrVerb : public Plugin {
     void run(const float **inputs, float **outputs, uint32_t frames) override;
 
    private:
-
-    float c1_1, c2_1, d0_1, c1_2, c2_2, d0_2, in_z1, in_z2, in_z12,in_z22, out_z1, out_z2;
+    // float c1_1, c2_1, d0_1, c1_2, c2_2, d0_2, in_z1, in_z2, in_z12,in_z22, out_z1, out_z2;
+    SVF f1, f2;
 
     int16_t ai, li, acc;
     uint16_t ptr;

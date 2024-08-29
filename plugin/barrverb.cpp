@@ -17,7 +17,37 @@
 */
 
 #include "barrverb.hpp"
+
 #include "rom.h"
+
+SVF::SVF(float cutoff = 0, float q = 0, float samplerate = 0) {
+    z1 = z2 = 0;
+    setFreq(cutoff, q, samplerate);
+}
+
+void SVF::setFreq(float cutoff, float q, float samplerate) {
+    z1 = z2 = 0;
+
+    printf("called with %f %f %f\n", cutoff, q, samplerate);
+    w = 2 * tan(3.14159 * (cutoff / samplerate));
+    a = w / q;
+    b = w * w;
+
+    // corrected SVF params, per Fons Adriaensen
+    c1 = (a + b) / (1 + a / 2 + b / 4);
+    c2 = b / (a + b);
+
+    d0 = c1 * c2 / 4;
+
+    printf("c1 %f c2 %f d0 %f\n", c1, c2, d0);
+}
+
+inline float SVF::lpStep(float in) {
+    x = in - z1 - z2;
+    z2 += c2 * z1;
+    z1 += c1 * x;
+    return d0 * x + z2;
+}
 
 START_NAMESPACE_DISTRHO
 
@@ -28,52 +58,8 @@ BarrVerb::BarrVerb() : Plugin(kParameterCount, 64, 0) {  // one parameter, 64 pr
     bzero(lowpass, sizeof(float) * getBufferSize());
     bzero(ram, sizeof(int16_t) * 16384);
 
-   /*
-        // calculate SVF params
-        // hardcoded values for now
-        float fc = 5019;
-        float F = fc / 48000;  // assume 48kHz
-        float w = 2 * tan(3.14159 * F);
-        float a = w / 0.7845;  // 1dB Chebyshev, 2-pole
-        float b = w * w;
-
-        // "corrected" SVF params, per Fons Adriaensen
-        c1_1 = (a + b) / (1 + a / 2 + b / 4);
-        c2_1 = b / (a + b);
-        d0_1 = c1_1 * c2_1 / 4;
-
-        fc = 9433;
-        F = fc / 48000;  // assume 48kHz
-        w = 2 * tan(3.14159 * F);
-        a = w / 3.5594;  // 1dB Chebyshev, 2-pole
-        b = w * w;
-
-        c1_2 = (a + b) / (1 + a / 2 + b / 4);
-        c2_2 = b / (a + b);
-        d0_2 = c1_2 * c2_2 / 4;*/
-    // calculate SVF params
-    // hardcoded values for now
-
-    float fc = 10000;
-    float F = fc / 48000;  // assume 48kHz
-    float w = 2 * tan(3.14159 * F);
-    float a = w / 0.5412;  // Butterworth 4-pole first stage
-    float b = w * w;
-
-    // "corrected" SVF params, per Fons Adriaensen
-    c1_1 = (a + b) / (1 + a / 2 + b / 4);
-    c2_1 = b / (a + b);
-    d0_1 = c1_1 * c2_1 / 4;
-
-    fc = 10000;
-    F = fc / 48000;  // assume 48kHz
-    w = 2 * tan(3.14159 * F);
-    a = w / 1.3065;  // Butterworth 4-pole second stage
-    b = w * w;
-
-    c1_2 = (a + b) / (1 + a / 2 + b / 4);
-    c2_2 = b / (a + b);
-    d0_2 = c1_2 * c2_2 / 4;
+    f1.setFreq(5916, .6572, getSampleRate());
+    f2.setFreq(9458, 2.536, getSampleRate());
 }
 
 // Initialisation functions
@@ -85,14 +71,14 @@ void BarrVerb::initParameter(uint32_t index, Parameter &parameter) {
         parameter.symbol = "program";
         parameter.ranges.def = 20.0f;
         parameter.ranges.min = 1.0f;
-        parameter.ranges.max = 64.0f; 
+        parameter.ranges.max = 64.0f;
     }
 }
 
 void BarrVerb::setParameterValue(uint32_t index, float value) {
     if (index == paramProgram) {
         program = value;
-        prog_offset = (((int)value-1) & 0x3f) << 7;
+        prog_offset = (((int)value - 1) & 0x3f) << 7;
     }
 }
 
@@ -107,14 +93,13 @@ void BarrVerb::initAudioPort(bool input, uint32_t index, AudioPort &port) {
     port.groupId = kPortGroupStereo;
     Plugin::initAudioPort(input, index, port);
 
-    if (input && index == 0) port.name="Left In";
-    if (input && index == 1) port.name="Right In";
-    if (!input && index == 0) port.name="Left Out";
-    if (!input && index == 1) port.name="Right Out";
+    if (input && index == 0) port.name = "Left In";
+    if (input && index == 1) port.name = "Right In";
+    if (!input && index == 0) port.name = "Left Out";
+    if (!input && index == 1) port.name = "Right Out";
 }
 
 void BarrVerb::initProgramName(uint32_t index, String &programName) {
-
     programName = prog_name[index & 0x3f].c_str();
 }
 
@@ -138,26 +123,15 @@ void BarrVerb::deactivate() {
 void BarrVerb::run(const float **inputs, float **outputs, uint32_t frames) {
     // actual effects here
 
-    float x;
     uint16_t opcode;
 
     for (uint32_t i = 0; i < frames; i++) {
         // smash to mono
-        lowpass[i] = (inputs[0][i] + inputs[1][i]) / 2;
-
-        // 10kHz lowpass filter, 2x oversampling
-        x = lowpass[i] - in_z1 - in_z2;
-        in_z2 += c2_1 * in_z1;
-        in_z1 += c1_1 * x;
-
-        x = (d0_1 * x + in_z2) - in_z12 - in_z22;
-        in_z22 += c2_2 * in_z12;
-        in_z12 += c1_2 * x;
-        lowpass[i] = d0_2 * x + in_z22;
+        lowpass[i] = f2.lpStep(f1.lpStep((inputs[0][i] + inputs[1][i]) / 2));
     }
 
     // now run the DSP
-    for (uint32_t i=0; i < frames; i+=2) {
+    for (uint32_t i = 0; i < frames; i += 2) {
         // run the actual DSP engine for each sample
         for (uint8_t step = 0; step < 128; step++) {
             opcode = rom[prog_offset + step];
@@ -183,24 +157,23 @@ void BarrVerb::run(const float **inputs, float **outputs, uint32_t frames) {
             }
 
             // clamp
-            if (ai > 2047) ai=2047;
-            if (ai < -2047) ai=-2047;
-
+            if (ai > 2047) ai = 2047;
+            if (ai < -2047) ai = -2047;
 
             if (step == 0x00) {
                 // load RAM from ADC
                 ram[ptr] = (int)(lowpass[i] * 2048);
             } else if (step == 0x60) {
                 // output right channel
-               //ai=0;
+                // ai=0;
                 outputs[1][i] = (float)ai / 2048;
-                outputs[1][i+1] = (float)ai / 2048;
+                outputs[1][i + 1] = (float)ai / 2048;
 
             } else if (step == 0x70) {
                 // output left channel
-                //ai=0;
+                // ai=0;
                 outputs[0][i] = (float)ai / 2048;
-                outputs[0][i+1] = (float)ai / 2048;
+                outputs[0][i + 1] = (float)ai / 2048;
             } else {
                 // everything else
                 // ADC and DAC operations don't affect the accumulator
