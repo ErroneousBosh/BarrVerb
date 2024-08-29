@@ -106,6 +106,11 @@ float BarrVerb::getParameterValue(uint32_t index) const {
 void BarrVerb::initAudioPort(bool input, uint32_t index, AudioPort &port) {
     port.groupId = kPortGroupStereo;
     Plugin::initAudioPort(input, index, port);
+
+    if (input && index == 0) port.name="Left In";
+    if (input && index == 1) port.name="Right In";
+    if (!input && index == 0) port.name="Left Out";
+    if (!input && index == 1) port.name="Right Out";
 }
 
 void BarrVerb::initProgramName(uint32_t index, String &programName) {
