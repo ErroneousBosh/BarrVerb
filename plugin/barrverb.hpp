@@ -23,7 +23,7 @@
 
 class SVF {
    public:
-    SVF(float cutoff, float q, float samplerate);
+    //SVF(float cutoff, float q, float samplerate);
     void setFreq(float cutoff, float q, float samplerate);
     float lpStep(float in);
 

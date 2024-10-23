@@ -33,6 +33,8 @@
 #define DISTRHO_PLUGIN_UNIQUE_ID BARR
 #define DISTRHO_PLUGIN_BRAND_ID GJCP
 
+#define DISTRHO_PLUGIN_CLAP_ID "net.gjcp.barrverb"
+
 
 enum Parameters {
 	paramProg,

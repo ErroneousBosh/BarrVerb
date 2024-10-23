@@ -20,10 +20,13 @@
 
 #include "rom.h"
 
-SVF::SVF(float cutoff = 0, float q = 0, float samplerate = 0) {
+/*
+
+SVF::SVF(float cutoff, float q, float samplerate) {
     z1 = z2 = 0;
     setFreq(cutoff, q, samplerate);
 }
+*/
 
 void SVF::setFreq(float cutoff, float q, float samplerate) {
     z1 = z2 = 0;
