@@ -12,7 +12,7 @@ NAME = BarrVerb
 FILES_DSP = barrverb.cpp
 include ../dpf/Makefile.plugins.mk
 
-TARGETS += vst2 vst3 jack lv2_dsp
+TARGETS += au vst2 vst3 jack lv2_dsp
 
 all: $(TARGETS)
 

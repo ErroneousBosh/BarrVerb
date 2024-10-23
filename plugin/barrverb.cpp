@@ -28,7 +28,7 @@ SVF::SVF(float cutoff = 0, float q = 0, float samplerate = 0) {
 void SVF::setFreq(float cutoff, float q, float samplerate) {
     z1 = z2 = 0;
 
-    printf("called with %f %f %f\n", cutoff, q, samplerate);
+    //printf("called with %f %f %f\n", cutoff, q, samplerate);
     w = 2 * tan(3.14159 * (cutoff / samplerate));
     a = w / q;
     b = w * w;
@@ -39,7 +39,7 @@ void SVF::setFreq(float cutoff, float q, float samplerate) {
 
     d0 = c1 * c2 / 4;
 
-    printf("c1 %f c2 %f d0 %f\n", c1, c2, d0);
+    //printf("c1 %f c2 %f d0 %f\n", c1, c2, d0);
 }
 
 inline float SVF::lpStep(float in) {
@@ -55,8 +55,8 @@ BarrVerb::BarrVerb() : Plugin(kParameterCount, 64, 0) {  // one parameter, 64 pr
     lowpass = new float[getBufferSize()];
     ram = new int16_t[16384];
 
-    bzero(lowpass, sizeof(float) * getBufferSize());
-    bzero(ram, sizeof(int16_t) * 16384);
+    memset(lowpass, 0, sizeof(float) * getBufferSize());
+    memset(ram, 0, sizeof(int16_t) * 16384);
 
     f1.setFreq(5916, .6572, getSampleRate());
     f2.setFreq(9458, 2.536, getSampleRate());
@@ -112,12 +112,12 @@ void BarrVerb::loadProgram(uint32_t index) {
 
 void BarrVerb::activate() {
     // calculate filter coefficients
-    printf("called activate()\n");
+    //printf("called activate()\n");
 }
 
 void BarrVerb::deactivate() {
     // zero out the outputs, maybe
-    printf("called deactivate()\n");
+   // printf("called deactivate()\n");
 }
 
 void BarrVerb::run(const float **inputs, float **outputs, uint32_t frames) {
