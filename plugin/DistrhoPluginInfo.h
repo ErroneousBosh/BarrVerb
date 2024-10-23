@@ -30,6 +30,8 @@
 
 #define DISTRHO_PLUGIN_WANT_PROGRAMS 1
 
+#define DISTRHO_PLUGIN_UNIQUE_ID BARR
+
 
 enum Parameters {
 	paramProg,
