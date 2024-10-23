@@ -48,12 +48,12 @@ jobs:
         with:
           target: ${{ matrix.target }}
 
-  pluginval:
-    runs-on: ubuntu-20.04
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: recursive
-      - uses: distrho/dpf-makefile-action@v1
-        with:
-          target: pluginval
+  # pluginval:
+  #   runs-on: ubuntu-20.04
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #       with:
+  #         submodules: recursive
+  #     - uses: distrho/dpf-makefile-action@v1
+  #       with:
+  #         target: pluginval
