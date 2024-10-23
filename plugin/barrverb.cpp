@@ -123,7 +123,7 @@ void BarrVerb::deactivate() {
 void BarrVerb::run(const float **inputs, float **outputs, uint32_t frames) {
     // actual effects here
 
-    uint16_t opcode;
+    uint16_t opcode = 0;
 
     for (uint32_t i = 0; i < frames; i++) {
         // smash to mono
