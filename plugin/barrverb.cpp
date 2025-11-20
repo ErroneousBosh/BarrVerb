@@ -55,11 +55,7 @@ inline float SVF::lpStep(float in) {
 START_NAMESPACE_DISTRHO
 
 BarrVerb::BarrVerb() : Plugin(kParameterCount, 64, 0) {  // one parameter, 64 programs, no states
-    lowpass = new float[getBufferSize()];
-    ram = new int16_t[16384];
-
-    memset(lowpass, 0, sizeof(float) * getBufferSize());
-    memset(ram, 0, sizeof(int16_t) * 16384);
+    lowpass.resize(getBufferSize());
 
     f1.setFreq(5916, .6572, getSampleRate());
     f2.setFreq(9458, 2.536, getSampleRate());

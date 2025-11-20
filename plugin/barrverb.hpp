@@ -19,6 +19,8 @@
 #ifndef BARRVERB_HPP
 #define BARRVERB_HPP
 
+#include <array>
+#include <vector>
 #include "DistrhoPlugin.hpp"
 
 class SVF {
@@ -77,8 +79,8 @@ class BarrVerb : public Plugin {
     uint16_t ptr = 0;
     uint16_t prog_offset = 0;
 
-    int16_t *ram;
-    float *lowpass;
+    std::array<int16_t, 16384> ram{};
+    std::vector<float> lowpass{};
     uint8_t program;
 
     DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(BarrVerb);
